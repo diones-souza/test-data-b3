@@ -4,6 +4,7 @@
 ### Docker - Project Setup Laravel
 
 ```sh
+cd api
 ./vendor/bin/sail up
 ```
 
