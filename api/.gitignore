@@ -9,6 +9,8 @@
 .env.backup
 .env.production
 .phpunit.result.cache
+supervisord.log
+supervisord.pid
 Homestead.json
 Homestead.yaml
 auth.json

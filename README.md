@@ -13,14 +13,17 @@ Criar o projeto em Laravel com os seguintes requisitos:
 
 ```sh
 cd api
-alias sail='[ -f sail ] && sh sail || sh vendor/bin/sail'
-sail up -d
+cp .env.example .env
+docker-compose up -d --build
+docker-compose exec app composer install
+docker-compose exec app php artisan key:generate
+docker-compose exec app php artisan migrate
+cd ..
 ```
 
 ### Docker - Project Setup Vuejs
 
 ```sh
 cd client
-docker build -t client .
-docker run -it -p 8080:80 --rm --name app client
+docker-compose up -d --build
 ```
