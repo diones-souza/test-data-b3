@@ -39,7 +39,7 @@ services:
     depends_on:
       - app
     ports:
-      - "9000:80"
+      - "8000:80"
     volumes:
       - ./:/var/www
       - ./docker-compose/nginx:/etc/nginx/conf.d
