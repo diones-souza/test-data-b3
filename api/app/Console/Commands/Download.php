@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\DownloadLendingOpenPosition;
 use App\Models\LendingOpenPosition;
 use DateInterval;
 use DatePeriod;
@@ -32,8 +33,6 @@ class Download extends Command
     public function handle()
     {
         try {
-            DB::beginTransaction();
-
             $start_date = $this->argument('start_date');
             $end_date = $this->argument('end_date') ?? $start_date;
 
@@ -51,70 +50,14 @@ class Download extends Command
             $period = new DatePeriod($start_date, $interval, $end_date);
 
             foreach ($period as $date) {
-                $this->line("downloading data of the day: {$date->format('Y-m-d')}");
-                $page = 1;
-                $last_page = 1;
-                $break = false;
-                while (!$break) {
-                    try {
-                        $url = "https://arquivos.b3.com.br/tabelas/table/LendingOpenPosition/{$date->format('Y-m-d')}/{$page}";
-
-                        $response = Http::timeout(60)->get($url);
-
-                        if (!$response->ok()) {
-                            $this->error("Error downloading page data {$page}: {$response->status()} {$response->body()}");
-                            return;
-                        }
-
-                        $item = json_decode($response->body());
-
-                        if ($page === 1 && !empty($item->pageCount)) $last_page = $item->pageCount;
-
-                        if (!empty($item->values)) {
-                            $items = $item->values;
-
-                            foreach ($items as $item) {
-                                LendingOpenPosition::create([
-                                    'date' => $item[0],
-                                    'paper' => $item[1],
-                                    'asset_role' => $item[2],
-                                    'balance_amount' => $item[3],
-                                    'average_price' => $item[4],
-                                    'price_factor' => $item[5],
-                                    'total_balance' => $item[6],
-                                ]);
-                            }
-
-                            $percent_done = ($page) / $last_page * 100;
-                            $this->output->write("\x0D");
-                            if ($percent_done === 100) {
-                                $this->output->write(sprintf("Progress: %.2f%%\n", $percent_done));
-                            } else {
-                                $this->output->write(sprintf("Progress: %.2f%%", $percent_done));
-                            }
-
-                        } else {
-                            $this->error("there is no data to download");
-                        }
-
-                        if ($last_page === $page || !$last_page) {
-                            $break = true; // No more data on this page
-                        }
-
-                        $page++;
-
-                        sleep(rand(2, 4));
-                    } catch (\Throwable $th) {
-                        throw $th;
-                    }
-                }
+                $this->line("added to queue the day: {$date->format('Y-m-d')}");
+                DownloadLendingOpenPosition::dispatch($date)->onQueue('download');
             }
 
             DB::commit();
 
-            $this->info('Data successfully downloaded!');
+            $this->info('Data download added to queue!');
         } catch (\Throwable $th) {
-            DB::rollback();
             $this->error($th);
             return;
         }

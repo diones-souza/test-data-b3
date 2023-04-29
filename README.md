@@ -22,6 +22,10 @@ docker-compose exec app php artisan app:download {start_date} {end_date?}
 cd ..
 ```
 
+### observation
+
+- you can follow the download log at storege/logs/download.log
+
 ### Docker - Project Setup Vuejs
 
 ```sh
