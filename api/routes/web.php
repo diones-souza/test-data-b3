@@ -16,5 +16,3 @@ use App\Http\Controllers\LendingOpenPositionController;
 Route::get('/', function () {
     return view('index');
 });
-
-Route::resource('lending-open-position', LendingOpenPositionController::class);

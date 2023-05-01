@@ -2,14 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\LendingOpenPosition;
+use App\Services\LendingOpenPositionService;
+use Illuminate\Http\Request;
 
 class LendingOpenPositionController extends Controller
 {
-    public function index()
+    private $service;
+
+    public function __construct(LendingOpenPositionService $service)
     {
-        $lendingOpenPositions = LendingOpenPosition::all();
-        return response()->json($lendingOpenPositions);
+        $this->service = $service;
     }
 
+    public function getPapers(Request $request)
+    {
+        try {
+            return $this->service->getPapers($request->all());
+        } catch (\Throwable $th) {
+            return $th;
+        }
+    }
 }

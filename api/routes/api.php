@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LendingOpenPositionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,4 +17,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::group(['prefix' => 'lending-open-position', 'middleware' => 'web'], function () {
+    Route::get('/papers', LendingOpenPositionController::class . '@getPapers');
 });
