@@ -35,4 +35,15 @@ class LendingOpenPositionService
             throw $th;
         }
     }
+
+    public function getPaperData(string $paper)
+    {
+        try {
+            $data = LendingOpenPosition::where('paper', $paper)->get();
+
+            return response()->json($data);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
 }

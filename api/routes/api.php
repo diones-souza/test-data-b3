@@ -21,4 +21,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::group(['prefix' => 'lending-open-position', 'middleware' => 'web'], function () {
     Route::get('/papers', LendingOpenPositionController::class . '@getPapers');
+    Route::get('/paper-data', LendingOpenPositionController::class . '@getPaperData');
 });
