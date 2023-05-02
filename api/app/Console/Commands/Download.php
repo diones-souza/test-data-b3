@@ -8,8 +8,6 @@ use DateInterval;
 use DatePeriod;
 use DateTime;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 
 class Download extends Command
 {
@@ -50,11 +48,13 @@ class Download extends Command
             $period = new DatePeriod($start_date, $interval, $end_date);
 
             foreach ($period as $date) {
-                $this->line("added to queue the day: {$date->format('Y-m-d')}");
-                DownloadLendingOpenPosition::dispatch($date)->onQueue('download');
+                $data = LendingOpenPosition::whereRaw("DATE(date) = ?", [$date])->first();
+                if (isset($data)) $this->error('Record already exists');
+                else {
+                    $this->line("added to queue the day: {$date->format('Y-m-d')}");
+                    DownloadLendingOpenPosition::dispatch($date)->onQueue('download');
+                }
             }
-
-            DB::commit();
 
             $this->info('Data download added to queue!');
         } catch (\Throwable $th) {

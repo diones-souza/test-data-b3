@@ -1,26 +1,49 @@
 <template>
   <div>
-    <SelectBox :options="options" @input="loadChart" @change="(v) => search = v" class="float-right mr-8 z-10" style="margin-top: -10px;"/>
-    <div ref="chart"></div>
+    <SelectBox :options="options" @input="loadChart" @change="(v) => search = v" class="float-right z-10" :class="{'mr-36': series.length}" style="margin-top: -10px;" />
+    <SpinnerBox :loading="isLoading"/>
+    <apexchart height="350px" type="area" :options="chartOptions" :series="series"></apexchart>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, defineAsyncComponent } from 'vue'
-import type { ApexOptions } from 'apexcharts'
-import ApexCharts from 'apexcharts'
+import moment from 'moment';
 import _ from 'lodash'
 
 const SelectBox = defineAsyncComponent(() => import('../components/SelectBox.vue'))
+const SpinnerBox = defineAsyncComponent(() => import('../components/SpinnerBox.vue'))
+
+interface Paper {
+  id: number,
+  date: string,
+  paper: string,
+  asset_role: string,
+  balance_amount: string,
+  average_price: string,
+  price_factor: string,
+  total_balance: string,
+  created_at: string,
+  updated_at: string
+}
+
+interface Series {
+  name: string,
+  data: Array<number>
+}
 
 export default defineComponent({
   name: 'HomeScreen',
   components: {
-    SelectBox
+    SelectBox,
+    SpinnerBox
   },
   data:()=> ({
     options: [],
-    search: ''
+    search: '',
+    chartOptions: {},
+    series: [] as Array<Series>,
+    isLoading: false
   }),
   watch: {
     search: _.debounce(function(this: any, value: string){
@@ -42,26 +65,43 @@ export default defineComponent({
         console.error(error)
       }
     },
-    loadChart(value: string) {
-      console.log(value);
-      
-      const options: ApexOptions = {
-        chart: {
-          type: 'bar'
+    async getPaperData(paper: string = '') {
+      try {
+        const url = import.meta.env.VITE_API_URL
+        const response = await fetch(`${url}/lending-open-position/paper-data?` + new URLSearchParams({
+          paper
+        }))
+        return await response.json()
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    async loadChart(name: string) {
+      this.isLoading = true
+
+      const items = await this.getPaperData(name)
+
+      const categories = items.map((item: Paper) => moment(item.date).utc().format('YYYY-MM-DD'))
+
+      this.series = [
+        {
+          name: 'Average Price',
+          data: items.map((item: Paper) => parseFloat(item.average_price))
         },
-        series: [
-          {
-            name: 'sales',
-            data: [30, 40, 45, 50, 49, 60, 70, 91, 125]
-          }
-        ],
+        {
+          name: 'Balance Amount',
+          data: items.map((item: Paper) => parseFloat(item.balance_amount))
+        }
+      ]
+
+      this.chartOptions = {
         xaxis: {
-          categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep']
+          type: 'date',
+          categories
         }
       }
-
-      const chart = new ApexCharts(this.$refs.chart as HTMLElement, options)
-      chart.render()
+      
+      this.isLoading = false
     },
   },
   mounted() {

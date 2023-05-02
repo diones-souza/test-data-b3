@@ -39,7 +39,7 @@ class LendingOpenPositionService
     public function getPaperData(string $paper)
     {
         try {
-            $data = LendingOpenPosition::where('paper', $paper)->get();
+            $data = LendingOpenPosition::where('paper', $paper)->orderBy('date')->get();
 
             return response()->json($data);
         } catch (\Throwable $th) {

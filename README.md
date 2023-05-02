@@ -23,7 +23,8 @@ cd ..
 ```
 
 ### observation
-
+- example used in test
+    - docker-compose exec app php artisan app:download 2023-04-25 2023-04-27
 - you can follow the download log at storege/logs/download.log
 
 ### Docker - Project Setup Vuejs
