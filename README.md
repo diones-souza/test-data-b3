@@ -22,7 +22,7 @@ docker-compose exec app php artisan app:download {start_date} {end_date?}
 cd ..
 ```
 
-### observation
+### Observation
 - example used in test
     - docker-compose exec app php artisan app:download 2023-04-25 2023-04-27
 - you can follow the download log at storege/logs/download.log
@@ -32,6 +32,14 @@ cd ..
 ```sh
 cd client
 docker-compose up -d --build
+```
+
+### Test battery
+
+```sh
+docker-compose exec app php artisan key:generate --env=testing
+docker-compose exec app php artisan migrate --env=testing
+docker-compose exec app php artisan test
 ```
 
 ![App](https://uploaddeimagens.com.br/images/004/455/001/original/app.png?1683305090)
