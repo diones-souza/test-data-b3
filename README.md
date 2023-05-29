@@ -12,27 +12,20 @@ Criar o projeto em Laravel com os seguintes requisitos:
 ### Docker - Project Setup Laravel
 
 ```sh
-cd api
 cp .env.example .env
 docker-compose up -d --build
 docker-compose exec app composer install
+docker-compose exec app npm install
+docker-compose exec app npm run build
 docker-compose exec app php artisan key:generate
 docker-compose exec app php artisan migrate
 docker-compose exec app php artisan app:download {start_date} {end_date?}
-cd ..
 ```
 
 ### Observation
 - example used in test
-    - docker-compose exec app php artisan app:download 2023-04-25 2023-04-27
+    - docker-compose exec app php artisan app:download 2023-05-25 2023-05-27
 - you can follow the download log at storege/logs/download.log
-
-### Docker - Project Setup Vuejs
-
-```sh
-cd client
-docker-compose up -d --build
-```
 
 ### Test battery
 
